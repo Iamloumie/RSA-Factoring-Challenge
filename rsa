@@ -1,62 +1,17 @@
 #!/usr/bin/python3
-import sys
-import time
-from math import gcd
-
-
-def pollards_rho(n):
-    if n % 2 == 0:
-        return 2
-
-    x = 2
-    y = 2
-    d = 1
-
-    def f(x):
-        return (x**2 + 1) % n
-
-    while d == 1:
-        x = f(x)
-        y = f(f(y))
-        d = gcd(abs(x - y), n)
-
-    if d == n:
-        return None
-    else:
-        return d
-
-
-def is_prime(n):
-    if n < 2:
-        return False
-    for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
-
-
-def factorize_rsa(n):
-    start_time = time.time()
-
-    while time.time() - start_time < 5:  # 5-second time limit
-        factor = pollards_rho(n)
-        if factor:
-            if is_prime(factor) and is_prime(n // factor):
-                return factor, n // factor
-
-    return None, None
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: ./rsa <file>")
-        sys.exit(1)
-
-    with open(sys.argv[1], 'r') as f:
-        n = int(f.read().strip())
-
-    p, q = factorize_rsa(n)
-    if p and q:
-        print(f"{n}={min(p, q)}*{max(p, q)}")
-    else:
-        print("Factorization not found within time limit.")
+from sys import argv
+with open(argv[1]) as f:
+    for line in f:
+        num = int(line)
+        print("{:d}=".format(num), end=' ')
+        if num % 2 == 0:
+            print("{}2".format(num//2))
+            continue
+        for i in range(3, num, 2):
+            if num % i == 0:
+                factor = num/i
+                for j in range(3, factor, 2):
+                    if factor % j == 0 or j == 0:
+                        break
+                print("{}{}".format(factor, i))
+                break

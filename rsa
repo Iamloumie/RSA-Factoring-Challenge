@@ -1,33 +1,53 @@
 #!/usr/bin/python3
 import sys
+import math
+
+
+def is_prime(n):
+    """Check if a number is prime."""
+    if n < 2:
+        return False
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+
+def factor_rsa(n):
+    """Factor an RSA number into two primes."""
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
+            if is_prime(i) and is_prime(n // i):
+                return i, n // i
+    return None, None  # This should not happen for a valid RSA number
 
 
 def fc():
     """
-    function fc to search file to convert number and format n=p*q
+    Function to read an RSA number from a file and factor it into two primes.
     """
     try:
-        revfile = sys.argv[1]
-        with open(revfile) as f:
-            for revnumber in f:
-                revnumber = int(revnumber.strip())
-                if revnumber % 2 == 0:
-                    print("{}={}*{}".format(revnumber, 2, revnumber // 2))
-                    continue
-                i = 3
-                while i <= int(revnumber**0.5):
-                    if revnumber % i == 0:
-                        print("{}={}*{}".format(revnumber, i, revnumber // i))
-                        break
-                    i += 2
-                else:
-                    print("{}={}*{}".format(revnumber, revnumber, 1))
-    except IndexError:
-        print("Please provide a filename as an argument.")
+        if len(sys.argv) < 2:
+            raise IndexError("No filename provided")
+
+        filename = sys.argv[1]
+        with open(filename, 'r') as file:
+            n = int(file.read().strip())
+
+        p, q = factor_rsa(n)
+        if p and q:
+            print(f"{n}={p}*{q}")
+        else:
+            print(f"Failed to factor {n} into two primes.")
+
+    except IndexError as e:
+        print(f"Error: {e}")
     except FileNotFoundError:
-        print(f"File '{revfile}' not found.")
+        print(f"Error: File '{filename}' not found.")
     except ValueError:
-        print("Invalid number in the file.")
+        print("Error: Invalid number in the file.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 
 if __name__ == "__main__":

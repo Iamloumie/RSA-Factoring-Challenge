@@ -1,32 +1,56 @@
 #!/usr/bin/python3
-# library to get arguments
 import sys
+import time
+from math import gcd
 
+def pollards_rho(n):
+    if n % 2 == 0:
+        return 2
+    
+    x = 2
+    y = 2
+    d = 1
+    f = lambda x: (x**2 + 1) % n
+    
+    while d == 1:
+        x = f(x)
+        y = f(f(y))
+        d = gcd(abs(x - y), n)
+    
+    if d == n:
+        return None
+    else:
+        return d
 
-# fn unpack number factorial
-def fc():
-    """
-    function fc to search file to convert number and format n=p*q
-    """
-    try:
-        revfile = sys.argv[1]
-        with open(revfile) as f:
-            for revnumber in f:
-                revnumber = int(revnumber)
-                if revnumber % 2 == 0:
-                        print("{}={}*{}".format(revnumber, revnumber // 2, 2))
-                        continue
-                i = 3
-                while i < revnumber // 2:
-                    if revnumber % i == 0:
-                        print("{}={}*{}".format(revnumber, revnumber // i, i))
-                        break
-                    i = i + 2
-                if i == (revnumber // 2) + 1:
-                    print("{}={}*{}".format(revnumber, revnumber, 1))
-    except (IndexError):
-        pass
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
 
+def factorize_rsa(n):
+    start_time = time.time()
+    
+    while time.time() - start_time < 5:  # 5-second time limit
+        factor = pollards_rho(n)
+        if factor:
+            if is_prime(factor) and is_prime(n // factor):
+                return factor, n // factor
+    
+    return None, None
 
-# autostart
-fc()
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: ./rsa <file>")
+        sys.exit(1)
+
+    with open(sys.argv[1], 'r') as f:
+        n = int(f.read().strip())
+
+    p, q = factorize_rsa(n)
+    if p and q:
+        print(f"{p}={q}*{p}")
+    else:
+        print("Factorization not found within time limit.")
